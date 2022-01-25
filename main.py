@@ -1,9 +1,12 @@
+# source venv/bin/activate
 import re
 import os
 from pathlib import Path
 import shutil
 import logging
 import time
+
+from progresbar import progressbar
 
 # TODO send hook to plex to re search
 logging.basicConfig(filename='log films.log',
@@ -63,9 +66,13 @@ while True:
                         break
                 if new_path is None:
                     pass  # TODO make new dirr
-                shutil.move(path_old_tv, new_path)
+                # shutil.move(path_old_tv, new_path)
+                print(new_path)
+                os.system(f'rsync -a --progress --stats --human-readable'
+                          f' {path_old_tv}'
+                          f' {new_path}')
                 logging.info(f"{tvs} was add to: {new_path}")
-                # print(new_path)
+                print(new_path)
 
             # Movie
             movie = re.findall(r"""
