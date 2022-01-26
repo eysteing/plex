@@ -2,3 +2,6 @@ tqdm~=4.62.3
 pandas~=1.4.0
 numpy~=1.22.1
 Send2Trash~=1.8.0
+inquirer~=2.9.1
+PlexAPI~=4.9.1
+requests~=2.27.1
