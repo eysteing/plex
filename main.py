@@ -69,7 +69,7 @@ while True:
                     if season[0] == '0':
                         season = season.replace("0", "")
                     if tvs in subdirs:
-                        print(tvs)
+                        print(f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}")
                         new_path = path_tv \
                                    + "/" \
                                    + tvs \
@@ -83,7 +83,8 @@ while True:
                 send2trash(path_old_tv)
                 logging.info(f"{tvs} was add to: {new_path}")
                 update_plexapi()
-                print("Done")
+                print("\n Done")
+                logging.info("Done")
 
             # Movie
             movie = re.findall(r"""
@@ -109,7 +110,8 @@ while True:
                     send2trash(path_old_mov)
                     logging.info(f"{movs} was add to: {new_path}")
                     update_plexapi()
-                    print("Done")
+                    print("\n Done")
+                    logging.info("Done")
 
     if removed:
         logging.info(f"Removed: {removed}")
