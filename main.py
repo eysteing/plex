@@ -5,8 +5,10 @@ from pathlib import Path
 import shutil
 import logging
 import time
+from send2trash import send2trash
 
-from progresbar import progressbar
+
+from progress import copyfile
 
 # TODO send hook to plex to re search
 logging.basicConfig(filename='log films.log',
@@ -20,8 +22,14 @@ path_mov = "/Volumes/homes/plex/Movies"
 
 before = dict([(f, None) for f in os.listdir(paths)])
 
+
+def camel_case(s):
+    s = re.sub(r"(_|-)+", " ", s).title()
+    return ''.join([s[:]])
+
+
 while True:
-    time.sleep(10)
+    time.sleep(2)
     after = dict([(f, None) for f in os.listdir(paths)])
     added = [f for f in after if f not in before]
     removed = [f for f in before if f not in after]
@@ -34,6 +42,7 @@ while True:
             for name in files:
                 for extension in extensions:
                     if re.findall(extension, name):
+                        print(name)
                         film_lst.append(name)
                         path_lst.append(path + "/" + name)
 
@@ -48,31 +57,36 @@ while True:
             [ .a-zA-Z]* # Space, period or words like Proper/buried
             (\d{3,4}p)? # Quality
             """, name, re.VERBOSE)
+
             if tv:
+                print(tv)
                 p = Path(path_lst[0])
                 path_old_tv = p.rename(Path(p.parent, f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}{p.suffix}"))
                 for path, subdirs, files in os.walk(f"{path_tv}"):
-                    if tv[0][0].replace(".", " ") in subdirs:
-                        tvs = tv[0][0].replace(".", " ")
-                        season = tv[0][1]
-                        if season[0] == '0':
-                            season.replace("0", "")
+                    tvs = tv[0][0].replace(".", " ")
+                    tvs = name = camel_case(tvs)
+                    season = tv[0][1]
+
+                    if season[0] == '0':
+                        season = season.replace("0", "")
+                    print(tvs)
+                    if tvs in subdirs:
                         new_path = path_tv \
                                    + "/" \
                                    + tvs \
                                    + "/" \
                                    + "Season " + season + "/" \
-                                   + f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}{p.suffix}"
+                                   + f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}" \
+                                     f" - {time.asctime(time.localtime(time.time()))}{p.suffix}"
+                        print(new_path)
                         break
-                if new_path is None:
-                    pass  # TODO make new dirr
+
                 # shutil.move(path_old_tv, new_path)
-                print(new_path)
-                os.system(f'rsync -a --progress --stats --human-readable'
-                          f' {path_old_tv}'
-                          f' {new_path}')
+                # progressbar(path_old_tv, new_path, tvs)
+                copyfile(path_old_tv,new_path)
                 logging.info(f"{tvs} was add to: {new_path}")
-                print(new_path)
+                # copyfile(srr, dest)
+                send2trash(path_old_tv)
 
             # Movie
             movie = re.findall(r"""
