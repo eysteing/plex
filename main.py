@@ -69,7 +69,7 @@ while True:
                     if season[0] == '0':
                         season = season.replace("0", "")
                     if tvs in subdirs:
-                        print(f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}")
+                        # print(f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}")
                         new_path = path_tv \
                                    + "/" \
                                    + tvs \
@@ -77,6 +77,7 @@ while True:
                                    + "Season " + season + "/" \
                                    + f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}" \
                                      f" - {time.asctime(time.localtime(time.time()))}{p.suffix}"
+                        print(new_path)
                         break
 
                 copyfile(path_old_tv, new_path)
