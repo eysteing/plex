@@ -30,7 +30,7 @@ def camel_case(s):
 
 
 while True:
-    time.sleep(2)
+    time.sleep(10)
     after = dict([(f, None) for f in os.listdir(paths)])
     added = [f for f in after if f not in before]
     removed = [f for f in before if f not in after]
