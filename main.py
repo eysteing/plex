@@ -47,8 +47,8 @@ while True:
                         film_lst.append(name)
                         path_lst.append(path + "/" + name)
 
-        # --------TV--------
         for name in film_lst:
+            # --------TV--------
             tv = re.findall(r"""
             (.*)  # Title
             [ .]
@@ -78,7 +78,8 @@ while True:
                                    + "/" \
                                    + tvs \
                                    + "/" \
-                                   + "Season " + season + "/" \
+                                   + "Season " + season \
+                                   + "/" \
                                    + f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}" \
                                      f" - {time.asctime(time.localtime(time.time()))}{p.suffix}"
                         break
@@ -103,23 +104,22 @@ while True:
                 p = Path(path_lst[0])
                 try:
                     path_old_mov = p.rename(Path(p.parent, f"{movie[0][0]}{p.suffix}"))
+                    movs = movie[0][0].replace(".", " ")
+                    new_path = path_mov + "/" + movs + "/" + movs + f"{p.suffix}"
+                    os.makedirs(path_mov + "/" + movs.title())
                 except FileNotFoundError as e:
                     logging.info(e)
-                movs = movie[0][0].replace(".", " ")
 
-                new_path = path_mov + "/" + movs + "/" + movs + f"{p.suffix}"
-
-                if not os.path.exists(path_mov + "/" + movs):
-                    os.makedirs(path_mov + "/" + movs.title())
-                    try:
+                try:
+                    if not os.path.exists(path_mov + "/" + movs):
                         copyfile(path_old_mov, new_path)
                         send2trash(path_old_mov)
                         logging.info(f"{movs} was add to: {new_path}")
                         update_plexapi()
                         print("\n Done")
                         logging.info("Done")
-                    except NameError as e:
-                        logging.info(e)
+                except NameError as e:
+                    logging.info(e)
 
     if removed:
         logging.info(f"Removed: {removed}")
