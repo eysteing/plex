@@ -1,14 +1,15 @@
-# source venv/bin/activate
+#! source venv/bin/activate
+
 import re
 import os
-import sys
-from pathlib import Path
-import logging
 import time
+import logging
+from pathlib import Path
 from send2trash import send2trash
 
 from progress import copyfile
 from plex_update import update_plexapi
+
 
 logging.basicConfig(filename='log/log films.log',
                     level=logging.INFO,
@@ -19,6 +20,12 @@ extensions = ["avi", "mkv", "mp4"]
 paths = '/Users/Eystein/Downloads'
 path_tv = "/Volumes/homes/plex/TV Shows"
 path_mov = "/Volumes/homes/plex/Movies"
+path_old_tv = None
+path_old_mov = None
+new_path = None
+tvs = None
+movs = None
+
 
 before = dict([(f, None) for f in os.listdir(paths)])
 
@@ -41,18 +48,15 @@ while True:
 
     if added:
         logging.info(f"Added: {added}")
-        # film_lst = []
-        # path_lst = []
 
-        for path, subdirs, files in os.walk(f"{paths}"):
+        for path, sub_dirs, files in os.walk(f"{paths}"):
             for name in files:
                 for extension in extensions:
                     if re.findall(extension, name):
                         film_lst = name
                         path_lst = path + "/" + name
 
-        # for name in film_lst:
-            # --------TV--------
+        # --------TV--------
         tv = re.findall(r"""
         (.*)  # Title
         [ .]
@@ -93,37 +97,37 @@ while True:
                 logging.info(f"{tvs} was add to: {new_path}")
                 update_plexapi()
                 print("\n Done")
-                logging.info("Done")
+                logging.info("------------------Done------------------")
             except NameError as e:
                 logging.info(e)
 
-            movie = re.findall(r"""
-            (.*?[ .]\d{4})  # Title including year
-            [ .a-zA-Z]*  # Space,period, or words
-            (\d{3,4}p)?  #Quality
-            """, name, re.VERBOSE)
+        movie = re.findall(r"""
+        (.*?[ .]\d{4})  # Title including year
+        [ .a-zA-Z]*  # Space,period, or words
+        (\d{3,4}p)?  #Quality
+        """, name, re.VERBOSE)
 
-            # -----------Movie-------------
-            if movie:
-                p = Path(path_lst)
-                try:
-                    path_old_mov = p.rename(Path(p.parent, f"{movie[0][0]}{p.suffix}"))
-                    movs = movie[0][0].replace(".", " ")
-                    new_path = path_mov + "/" + movs + "/" + movs + f"{p.suffix}"
-                    os.makedirs(path_mov + "/" + movs.title())
-                except FileNotFoundError as e:
-                    logging.info(e)
+        # -----------Movie-------------
+        if movie:
+            p = Path(path_lst)
+            try:
+                path_old_mov = p.rename(Path(p.parent, f"{movie[0][0]}{p.suffix}"))
+                movs = movie[0][0].replace(".", " ")
+                new_path = path_mov + "/" + movs + "/" + movs + f"{p.suffix}"
+                os.makedirs(path_mov + "/" + movs.title())
+            except FileNotFoundError as e:
+                logging.info(e)
 
-                try:
-                    if not os.path.exists(path_mov + "/" + movs):
-                        copyfile(path_old_mov, new_path)
-                        send2trash(path_old_mov)
-                        logging.info(f"{movs} was add to: {new_path}")
-                        update_plexapi()
-                        print("\n Done")
-                        logging.info("Done")
-                except NameError as e:
-                    logging.info(e)
+            try:
+                if not os.path.exists(path_mov + "/" + movs):
+                    copyfile(path_old_mov, new_path)
+                    send2trash(path_old_mov)
+                    logging.info(f"{movs} was add to: {new_path}")
+                    update_plexapi()
+                    print("\n Done")
+                    logging.info("------------------Done------------------")
+            except NameError as e:
+                logging.info(e)
 
     if removed:
         logging.info(f"Removed: {removed}")
