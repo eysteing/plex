@@ -1,17 +1,16 @@
-#! source venv/bin/activate
-
+# source venv/bin/activate
 import re
 import os
-import time
-import logging
+import sys
 from pathlib import Path
+import logging
+import time
 from send2trash import send2trash
 
 from progress import copyfile
 from plex_update import update_plexapi
 
-
-logging.basicConfig(filename='log/log films.log',
+logging.basicConfig(filename='log films.log',
                     level=logging.INFO,
                     format='%(asctime)s:%(message)s')
 
@@ -20,12 +19,6 @@ extensions = ["avi", "mkv", "mp4"]
 paths = '/Users/Eystein/Downloads'
 path_tv = "/Volumes/homes/plex/TV Shows"
 path_mov = "/Volumes/homes/plex/Movies"
-path_old_tv = None
-path_old_mov = None
-new_path = None
-tvs = None
-movs = None
-
 
 before = dict([(f, None) for f in os.listdir(paths)])
 
@@ -33,10 +26,6 @@ before = dict([(f, None) for f in os.listdir(paths)])
 def camel_case(s):
     s = re.sub(r"(_|-)+", " ", s).title()
     return ''.join([s[:]])
-
-
-def subtitles():
-    sub_extensions = ["srt", "sub"]
 
 
 while True:
@@ -48,88 +37,89 @@ while True:
 
     if added:
         logging.info(f"Added: {added}")
+        film_lst = []
+        path_lst = []
 
-        for path, sub_dirs, files in os.walk(f"{paths}"):
+        for path, subdirs, files in os.walk(f"{paths}"):
             for name in files:
                 for extension in extensions:
                     if re.findall(extension, name):
-                        film_lst = name
-                        path_lst = path + "/" + name
+                        film_lst.append(name)
+                        path_lst.append(path + "/" + name)
 
-        # --------TV--------
-        tv = re.findall(r"""
-        (.*)  # Title
-        [ .]
-        S(\d{1,2})  # Season
-        E(\d{1,2})  # Episode
-        [ .a-zA-Z]* # Space, period or words like Proper/buried
-        (\d{3,4}p)? # Quality
-        """, camel_case(name), re.VERBOSE)
-        print(f"Tv =  {tv}")
+        for name in film_lst:
+            # --------TV--------
+            tv = re.findall(r"""
+            (.*)  # Title
+            [ .]
+            S(\d{1,2})  # Season
+            E(\d{1,2})  # Episode
+            [ .a-zA-Z]* # Space, period or words like Proper/buried
+            (\d{3,4}p)? # Quality
+            """, camel_case(name), re.VERBOSE)
 
-        if tv:
-            p = Path(path_lst)
-            try:
-                path_old_tv = p.rename(Path(p.parent, f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}{p.suffix}"))
-            except FileNotFoundError as e:
-                logging.info(e)
+            if tv:
+                p = Path(path_lst[0])
+                try:
+                    path_old_tv = p.rename(Path(p.parent, f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}{p.suffix}"))
+                except FileNotFoundError as e:
+                    logging.info(e)
 
-            for path, subdirs, files in os.walk(f"{path_tv}"):
-                tvs = tv[0][0].replace(".", " ")
-                tvs = camel_case(tvs)
-                season = tv[0][1]
+                for path, subdirs, files in os.walk(f"{path_tv}"):
+                    tvs = tv[0][0].replace(".", " ")
+                    tvs = camel_case(tvs)
+                    season = tv[0][1]
 
-                if season[0] == '0':
-                    season = season.replace("0", "")
-                if tvs in subdirs:
-                    print(f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}")
-                    new_path = path_tv \
-                               + "/" \
-                               + tvs \
-                               + "/" \
-                               + "Season " + season \
-                               + "/" \
-                               + f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}" \
-                                 f" - {time.asctime(time.localtime(time.time()))}{p.suffix}"
-                    break
-            try:
-                copyfile(path_old_tv, new_path)
-                send2trash(path_old_tv)
-                logging.info(f"{tvs} was add to: {new_path}")
-                update_plexapi()
-                print("\n Done")
-                logging.info("------------------Done------------------")
-            except NameError as e:
-                logging.info(e)
-
-        movie = re.findall(r"""
-        (.*?[ .]\d{4})  # Title including year
-        [ .a-zA-Z]*  # Space,period, or words
-        (\d{3,4}p)?  #Quality
-        """, name, re.VERBOSE)
-
-        # -----------Movie-------------
-        print(f"Movie =  {movie}")
-        if movie:
-            p = Path(path_lst)
-            try:
-                path_old_mov = p.rename(Path(p.parent, f"{movie[0][0]}{p.suffix}"))
-                movs = movie[0][0].replace(".", " ")
-                new_path = path_mov + "/" + movs + "/" + movs + f"{p.suffix}"
-                os.makedirs(path_mov + "/" + movs.title())
-            except FileNotFoundError as e:
-                logging.info(e)
-
-            try:
-                if not os.path.exists(path_mov + "/" + movs):
-                    copyfile(path_old_mov, new_path)
-                    send2trash(path_old_mov)
-                    logging.info(f"{movs} was add to: {new_path}")
+                    if season[0] == '0':
+                        season = season.replace("0", "")
+                    if tvs in subdirs:
+                        print(f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}")
+                        new_path = path_tv \
+                                   + "/" \
+                                   + tvs \
+                                   + "/" \
+                                   + "Season " + season \
+                                   + "/" \
+                                   + f"{tv[0][0]}.S{tv[0][1]}E{tv[0][2]}" \
+                                     f" - {time.asctime(time.localtime(time.time()))}{p.suffix}"
+                        break
+                try:
+                    copyfile(path_old_tv, new_path)
+                    send2trash(path_old_tv)
+                    logging.info(f"{tvs} was add to: {new_path}")
                     update_plexapi()
                     print("\n Done")
-                    logging.info("------------------Done------------------")
-            except NameError as e:
-                logging.info(e)
+                    logging.info("Done")
+                except NameError as e:
+                    logging.info(e)
+
+            movie = re.findall(r"""
+            (.*?[ .]\d{4})  # Title including year
+            [ .a-zA-Z]*  # Space,period, or words
+            (\d{3,4}p)?  #Quality
+            """, name, re.VERBOSE)
+
+            # -----------Movie-------------
+            if movie:
+                p = Path(path_lst[0])
+                try:
+                    path_old_mov = p.rename(Path(p.parent, f"{movie[0][0]}{p.suffix}"))
+                    movs = movie[0][0].replace(".", " ")
+                    new_path = path_mov + "/" + movs + "/" + movs + f"{p.suffix}"
+                    os.makedirs(path_mov + "/" + movs.title())
+                except FileNotFoundError as e:
+                    logging.info(e)
+
+                try:
+                    if not os.path.exists(path_mov + "/" + movs):
+                        copyfile(path_old_mov, new_path)
+                        send2trash(path_old_mov)
+                        logging.info(f"{movs} was add to: {new_path}")
+                        update_plexapi()
+                        print("\n Done")
+                        logging.info("Done")
+                except NameError as e:
+                    logging.info(e)
 
     if removed:
         logging.info(f"Removed: {removed}")
