@@ -46,7 +46,6 @@ while True:
                     if re.findall(extension, name):
                         film_lst.append(name)
                         path_lst.append(path + "/" + name)
-
         for name in film_lst:
             # --------TV--------
             tv = re.findall(r"""
@@ -58,6 +57,7 @@ while True:
             (\d{3,4}p)? # Quality
             """, camel_case(name), re.VERBOSE)
 
+            print(f"Tv = {tv}")
             if tv:
                 p = Path(path_lst[0])
                 try:
@@ -100,6 +100,7 @@ while True:
             """, name, re.VERBOSE)
 
             # -----------Movie-------------
+            print(f"Movie = {movie}")
             if movie:
                 p = Path(path_lst[0])
                 try:
