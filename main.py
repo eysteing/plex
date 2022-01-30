@@ -112,7 +112,7 @@ while True:
                     logging.info(e)
 
                 try:
-                    if not os.path.exists(path_mov + "/" + movs):
+                    if os.path.exists(path_mov + "/" + movs):
                         copyfile(path_old_mov, new_path)
                         send2trash(path_old_mov)
                         logging.info(f"{movs} was add to: {new_path}")
