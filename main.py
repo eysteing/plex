@@ -89,7 +89,7 @@ while True:
                     logging.info(f"{tvs} was add to: {new_path}")
                     update_plexapi()
                     print("\n Done")
-                    logging.info("Done")
+                    logging.info("-----------------Done-----------------")
                 except NameError as e:
                     logging.info(e)
 
@@ -118,7 +118,7 @@ while True:
                         logging.info(f"{movs} was add to: {new_path}")
                         update_plexapi()
                         print("\n Done")
-                        logging.info("Done")
+                        logging.info("-----------------Done-----------------")
                 except NameError as e:
                     logging.info(e)
 
