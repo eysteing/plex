@@ -65,6 +65,7 @@ while True:
         [ .a-zA-Z]* # Space, period or words like Proper/buried
         (\d{3,4}p)? # Quality
         """, camel_case(name), re.VERBOSE)
+        print(f"Tv =  {tv}")
 
         if tv:
             p = Path(path_lst)
@@ -108,6 +109,7 @@ while True:
         """, name, re.VERBOSE)
 
         # -----------Movie-------------
+        print(f"Movie =  {movie}")
         if movie:
             p = Path(path_lst)
             try:
